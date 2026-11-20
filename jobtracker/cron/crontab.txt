@@ -1,0 +1,19 @@
+# JobTracker crontab
+# Adapter /usr/bin/php et /path/to/jobtracker selon votre hébergement
+# Vérifier le chemin PHP : which php
+
+PHP=/usr/bin/php
+JOBTRACKER=/path/to/jobtracker
+
+# Recherche d'offres : 7h et 13h en jours ouvrés
+0 7  * * 1-5 $PHP $JOBTRACKER/cron/run.php offres >> $JOBTRACKER/storage/logs/cron.log 2>&1
+0 13 * * 1-5 $PHP $JOBTRACKER/cron/run.php offres >> $JOBTRACKER/storage/logs/cron.log 2>&1
+
+# Analyse Gmail : toutes les 15 min de 7h à 21h
+*/15 7-21 * * * $PHP $JOBTRACKER/cron/run.php inbox >> $JOBTRACKER/storage/logs/cron.log 2>&1
+
+# Relances : jours ouvrés à 9h30
+30 9 * * 1-5 $PHP $JOBTRACKER/cron/run.php relances >> $JOBTRACKER/storage/logs/cron.log 2>&1
+
+# Récapitulatif matinal : 7h45 en jours ouvrés
+45 7 * * 1-5 $PHP $JOBTRACKER/cron/run.php digest >> $JOBTRACKER/storage/logs/cron.log 2>&1

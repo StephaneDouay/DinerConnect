@@ -1,0 +1,20 @@
+Options -Indexes
+
+# Allow only index.php and cron.php at root, plus assets/
+<FilesMatch "^(?!index\.php|cron\.php).*$">
+    <If "!-d">
+        Require all denied
+    </If>
+</FilesMatch>
+
+<Files "index.php">
+    Require all granted
+</Files>
+
+<Files "cron.php">
+    Require all granted
+</Files>
+
+<Directory "assets">
+    Require all granted
+</Directory>
