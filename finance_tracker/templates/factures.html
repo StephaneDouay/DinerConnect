@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}Factures – FinanceTracker{% endblock %}
+{% block content %}
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+  <h1 style="font-size:1.3rem;color:#1a1a2e">📂 Factures récurrentes</h1>
+  <form method="GET" style="display:flex;gap:8px;align-items:center">
+    <select name="mois" style="width:auto">
+      {% for m in mois_list %}
+        <option value="{{ m }}" {% if m==mois %}selected{% endif %}>
+          {{ ['','Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'][m] }}
+        </option>
+      {% endfor %}
+    </select>
+    <select name="annee" style="width:auto">
+      {% for a in annee_list %}
+        <option value="{{ a }}" {% if a==annee %}selected{% endif %}>{{ a }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-primary btn-sm">Afficher</button>
+  </form>
+</div>
+
+<div class="stat-grid">
+  <div class="stat"><div class="label">Total mensuel</div><div class="value orange">{{ "%.0f"|format(total) }} €</div></div>
+  <div class="stat"><div class="label">Factures</div><div class="value">{{ paiements|length }}</div></div>
+  <div class="stat"><div class="label">Payées</div><div class="value green">{{ payees }}</div></div>
+  <div class="stat"><div class="label">En attente</div><div class="value red">{{ paiements|length - payees }}</div></div>
+</div>
+
+<div class="card">
+  <h2>🗓 Suivi des paiements</h2>
+  {% if paiements %}
+  <table>
+    <tr><th>Facture</th><th>Catégorie</th><th>Montant</th><th>Échéance</th><th>Statut</th><th>Action</th></tr>
+    {% for p in paiements %}
+    <tr>
+      <td><strong>{{ p.nom }}</strong></td>
+      <td><span class="badge badge-gray">{{ p.categorie }}</span></td>
+      <td style="font-weight:600">{{ "%.2f"|format(p.montant) }} €</td>
+      <td>le {{ p.jour_echeance }}</td>
+      <td>
+        {% if p.statut=='payee' %}<span class="badge badge-green">✓ Payée {% if p.date_paiement %}({{ p.date_paiement }}){% endif %}</span>
+        {% else %}<span class="badge badge-yellow">En attente</span>{% endif %}
+      </td>
+      <td>
+        {% if p.statut=='payee' %}
+          <form method="POST" action="/factures/annuler/{{ p.facture_id }}" style="display:inline">
+            <input type="hidden" name="mois_str" value="{{ mois_str }}">
+            <input type="hidden" name="mois" value="{{ mois }}">
+            <input type="hidden" name="annee" value="{{ annee }}">
+            <button class="btn btn-outline btn-sm">Annuler</button>
+          </form>
+        {% else %}
+          <form method="POST" action="/factures/payer/{{ p.facture_id }}" style="display:inline">
+            <input type="hidden" name="mois_str" value="{{ mois_str }}">
+            <input type="hidden" name="mois" value="{{ mois }}">
+            <input type="hidden" name="annee" value="{{ annee }}">
+            <button class="btn btn-success btn-sm">✓ Marquer payée</button>
+          </form>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p style="color:#888;text-align:center;padding:20px">Aucune facture.</p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>➕ Ajouter une facture récurrente</h2>
+  <form method="POST" action="/factures/ajouter">
+    <div class="form-row">
+      <div class="field"><label>Nom</label><input type="text" name="nom" placeholder="ex: Netflix" required></div>
+      <div class="field"><label>Montant mensuel (€)</label><input type="number" name="montant" step="0.01" min="0" required></div>
+      <div class="field"><label>Jour d'échéance</label><input type="number" name="jour_echeance" min="1" max="31" required></div>
+      <div class="field">
+        <label>Catégorie</label>
+        <select name="categorie">
+          <option value="logement">Logement</option>
+          <option value="energie">Énergie</option>
+          <option value="telecom">Télécom</option>
+          <option value="assurance">Assurance</option>
+          <option value="sante">Santé</option>
+          <option value="loisirs">Loisirs</option>
+          <option value="transport">Transport</option>
+          <option value="autre">Autre</option>
+        </select>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-success">Ajouter</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>📋 Toutes les factures actives</h2>
+  <table>
+    <tr><th>Nom</th><th>Catégorie</th><th>Montant</th><th>Jour</th><th></th></tr>
+    {% for f in factures %}
+    <tr>
+      <td>{{ f.nom }}</td>
+      <td><span class="badge badge-gray">{{ f.categorie }}</span></td>
+      <td>{{ "%.2f"|format(f.montant) }} €</td>
+      <td>{{ f.jour_echeance }}</td>
+      <td><a href="/factures/supprimer/{{ f.id }}" class="btn btn-danger btn-sm"
+             onclick="return confirm('Archiver cette facture ?')">Archiver</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

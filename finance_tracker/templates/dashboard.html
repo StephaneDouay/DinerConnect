@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block title %}Tableau de bord – FinanceTracker{% endblock %}
+{% block content %}
+<h1 style="font-size:1.4rem;margin-bottom:20px;color:#1a1a2e">Tableau de bord – {{ mois_nom }}</h1>
+
+{% if alerte_epargne %}
+<div class="alerte">
+  ⚠️ <strong>Attention épargne cuisine :</strong> votre capacité d'épargne ce mois
+  ({{ "%.0f"|format(capacite_epargne) }}€) est inférieure à l'objectif mensuel
+  de {{ "%.0f"|format(542) }}€. Réduisez vos dépenses ou ajustez votre plan.
+</div>
+{% endif %}
+
+<div class="stat-grid">
+  <div class="stat">
+    <div class="label">Revenus du mois</div>
+    <div class="value green">{{ "%.0f"|format(solde.revenus) }} €</div>
+  </div>
+  <div class="stat">
+    <div class="label">Dépenses du mois</div>
+    <div class="value red">{{ "%.0f"|format(solde.depenses) }} €</div>
+  </div>
+  <div class="stat">
+    <div class="label">Solde net</div>
+    <div class="value {{ 'green' if solde.solde >= 0 else 'red' }}">{{ "%.0f"|format(solde.solde) }} €</div>
+  </div>
+  <div class="stat">
+    <div class="label">Total factures</div>
+    <div class="value orange">{{ "%.0f"|format(total_factures) }} €</div>
+  </div>
+  <div class="stat">
+    <div class="label">Capacité épargne</div>
+    <div class="value {{ 'green' if capacite_epargne >= 0 else 'red' }}">{{ "%.0f"|format(capacite_epargne) }} €</div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;flex-wrap:wrap">
+
+<div class="card">
+  <h2>🧾 Prochaines factures</h2>
+  {% if prochaines %}
+  <table>
+    <tr><th>Facture</th><th>Montant</th><th>Jour</th><th>Statut</th></tr>
+    {% for f in prochaines %}
+    <tr>
+      <td>{{ f.nom }}</td>
+      <td>{{ "%.0f"|format(f.montant) }} €</td>
+      <td>{{ f.jour }}</td>
+      <td>
+        {% if f.statut == 'payee' %}
+          <span class="badge badge-green">Payée</span>
+        {% elif f.retard %}
+          <span class="badge badge-red">En retard</span>
+        {% else %}
+          <span class="badge badge-yellow">En attente</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p style="color:#888;font-size:.9rem">Aucune facture.</p>
+  {% endif %}
+  <div style="margin-top:12px">
+    <a href="/factures" class="btn btn-outline btn-sm">Voir toutes les factures →</a>
+  </div>
+</div>
+
+{% if cuisine %}
+<div class="card">
+  <h2>🍳 Objectif cuisine</h2>
+  <p style="font-size:.9rem;color:#555;margin-bottom:12px">{{ cuisine.nom }}</p>
+  <div class="progress-bar" style="margin-bottom:10px">
+    <div class="fill {{ 'orange' if cuisine.pct < 50 else 'fill' }}" style="width:{{ cuisine.pct }}%"></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;font-size:.85rem;color:#666;margin-bottom:12px">
+    <span>{{ "%.0f"|format(cuisine.montant_actuel) }} € versés</span>
+    <span>{{ cuisine.pct }}%</span>
+    <span>{{ "%.0f"|format(cuisine.montant_cible) }} € objectif</span>
+  </div>
+  <div style="font-size:.88rem;color:#555;margin-bottom:4px">
+    Reste à épargner : <strong>{{ "%.0f"|format(cuisine.reste) }} €</strong>
+  </div>
+  {% if cuisine.mois_restants %}
+  <div style="font-size:.88rem;color:#555;margin-bottom:4px">
+    Mois restants : <strong>{{ cuisine.mois_restants }}</strong>
+    → <strong>{{ "%.0f"|format(cuisine.mensualite_requise) }} €/mois</strong> requis
+  </div>
+  {% if capacite_epargne > 0 and cuisine.reste > 0 %}
+  {% set mois_a_ce_rythme = (cuisine.reste / capacite_epargne)|round(0,'ceil')|int %}
+  <div style="font-size:.88rem;color:#1d4ed8;margin-top:6px">
+    À votre capacité actuelle ({{ "%.0f"|format(capacite_epargne) }}€/mois) :
+    <strong>{{ mois_a_ce_rythme }} mois</strong> estimés
+  </div>
+  {% endif %}
+  {% endif %}
+  <div style="margin-top:12px">
+    <a href="/epargne" class="btn btn-outline btn-sm">Gérer l'épargne →</a>
+  </div>
+</div>
+{% endif %}
+
+</div>
+{% endblock %}

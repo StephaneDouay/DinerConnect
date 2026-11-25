@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Paramètres – JobTracker{% endblock %}
+{% block content %}
+<div class="page-header">
+  <span class="page-title">Paramètres</span>
+</div>
+
+{% if missing %}
+<div class="alert alert-warn">
+  ⚠️ Configuration à compléter dans <code>config.py</code> : {{ missing | join(', ') }}
+</div>
+{% else %}
+<div class="alert alert-success">✅ Configuration complète.</div>
+{% endif %}
+
+<div class="card">
+  <div class="card-title">Mot de passe dashboard</div>
+  <form method="post" style="max-width:400px">
+    <div class="form-group">
+      <label>Nouveau mot de passe (min 6 caractères)</label>
+      <input type="password" name="new_password" minlength="6">
+    </div>
+    <button type="submit" class="btn btn-primary btn-sm">Changer</button>
+  </form>
+  {% if generated_hash %}
+  <div style="margin-top:12px;font-size:.85em;color:var(--muted)">
+    Hash généré (déjà sauvegardé dans config.py) :<br>
+    <code style="color:var(--accent);word-break:break-all">{{ generated_hash }}</code>
+  </div>
+  {% endif %}
+</div>
+
+<div class="card">
+  <div class="card-title">Configuration actuelle (config.py)</div>
+  <table style="font-size:.85em;width:100%">
+    <tr><td style="color:var(--muted);padding:4px 0;width:160px">Email Gmail</td><td>{{ cfg.SMTP.get('user','—') }}</td></tr>
+    <tr><td style="color:var(--muted);padding:4px 0">Email candidat</td><td>{{ cfg.CANDIDAT.get('email','—') }}</td></tr>
+    <tr><td style="color:var(--muted);padding:4px 0">Nom candidat</td><td>{{ cfg.CANDIDAT.get('nom','—') }}</td></tr>
+    <tr><td style="color:var(--muted);padding:4px 0">Mots-clés</td><td>{{ cfg.RECHERCHE.get('mots_cles',[])|join(', ') }}</td></tr>
+    <tr><td style="color:var(--muted);padding:4px 0">Localisation</td><td>{{ cfg.RECHERCHE.get('localisation','—') }}</td></tr>
+    <tr><td style="color:var(--muted);padding:4px 0">France Travail API</td><td>{{ '✅ configuré' if cfg.FRANCE_TRAVAIL.get('client_id') and 'xxxx' not in cfg.FRANCE_TRAVAIL.get('client_id','') else '❌ non configuré' }}</td></tr>
+    <tr><td style="color:var(--muted);padding:4px 0">Adzuna API</td><td>{{ '✅ configuré' if cfg.ADZUNA.get('app_id') and 'xxxx' not in cfg.ADZUNA.get('app_id','') else '❌ non configuré' }}</td></tr>
+  </table>
+  <p style="margin-top:14px;font-size:.82em;color:var(--muted)">Modifiez directement le fichier <strong>config.py</strong> dans le dossier de l'application, puis redémarrez.</p>
+</div>
+
+<div class="card">
+  <div class="card-title">Actions manuelles</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn btn-secondary btn-sm" onclick="run('offres')">🔍 Chercher offres</button>
+    <button class="btn btn-secondary btn-sm" onclick="run('inbox')">📬 Analyser boîte mail</button>
+    <button class="btn btn-secondary btn-sm" onclick="run('relances')">📨 Envoyer relances</button>
+    <button class="btn btn-ghost btn-sm" onclick="run('digest')">📊 Envoyer digest</button>
+  </div>
+  <div id="run-out" style="display:none;margin-top:12px" class="alert alert-warn"></div>
+</div>
+
+<script>
+async function run(job){
+  const el=document.getElementById('run-out');
+  el.style.display='block';el.className='alert alert-warn';el.textContent='⏳ En cours…';
+  const r=await fetch('/jobs/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job})});
+  const d=await r.json();
+  if(d.ok){el.className='alert alert-success';el.textContent='✅ '+d.output;}
+  else{el.className='alert alert-error';el.textContent='❌ '+(d.error||d.output);}
+}
+</script>
+{% endblock %}

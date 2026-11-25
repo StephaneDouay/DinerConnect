@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Paramètres – FinanceTracker{% endblock %}
+{% block content %}
+<h1 style="font-size:1.3rem;color:#1a1a2e;margin-bottom:20px">⚙️ Paramètres</h1>
+
+<div class="card">
+  <h2>Revenu mensuel net</h2>
+  <form method="POST">
+    <div class="form-row" style="max-width:300px">
+      <div class="field"><label>Montant (€)</label>
+        <input type="number" name="revenu" value="{{ revenu }}" step="1" min="0" required>
+      </div>
+    </div>
+    <button type="submit" name="action" value="revenu" class="btn btn-primary">Mettre à jour</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Changer le mot de passe</h2>
+  <form method="POST" style="max-width:360px">
+    <div class="form-row">
+      <div class="field"><label>Ancien mot de passe</label><input type="password" name="ancien_mdp"></div>
+    </div>
+    <div class="form-row">
+      <div class="field"><label>Nouveau mot de passe</label><input type="password" name="nouveau_mdp"></div>
+    </div>
+    <button type="submit" class="btn btn-primary">Changer</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>À propos</h2>
+  <p style="font-size:.9rem;color:#555;margin-bottom:8px">FinanceTracker – application locale Flask/SQLite</p>
+  <p style="font-size:.85rem;color:#888">Port : 5001 · Base de données : finance.db</p>
+</div>
+{% endblock %}

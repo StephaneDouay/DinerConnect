@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JobTracker – Connexion</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0f0f13;--surface:#1a1a24;--border:#2a2a3a;--accent:#c9a96e;--text:#e8e8f0;--muted:#888;--error:#ef5350}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh}
+.box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:40px 36px;width:100%;max-width:360px}
+h1{font-size:1.4em;color:var(--accent);margin-bottom:6px}
+.sub{color:var(--muted);font-size:.88em;margin-bottom:28px}
+label{display:block;font-size:.85em;color:var(--muted);margin-bottom:5px}
+input[type=password]{width:100%;background:#111118;border:1px solid var(--border);border-radius:6px;padding:10px 13px;color:var(--text);font-size:.95em;margin-bottom:18px}
+input:focus{outline:none;border-color:var(--accent)}
+button{width:100%;background:var(--accent);color:#111;border:none;border-radius:6px;padding:11px;font-size:1em;font-weight:600;cursor:pointer}
+button:hover{background:#d4b47a}
+.err{background:#2e1a1a;border:1px solid var(--error);color:var(--error);border-radius:6px;padding:10px 13px;font-size:.88em;margin-bottom:16px}
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>📋 JobTracker</h1>
+  {% if first_run %}
+  <p class="sub">Première connexion — choisissez un mot de passe.</p>
+  {% else %}
+  <p class="sub">Entrez votre mot de passe pour accéder au dashboard.</p>
+  {% endif %}
+  {% if error %}<div class="err">{{ error }}</div>{% endif %}
+  <form method="post">
+    <label>{% if first_run %}Nouveau mot de passe{% else %}Mot de passe{% endif %}</label>
+    <input type="password" name="password" autofocus required minlength="6" placeholder="••••••••">
+    <button type="submit">{% if first_run %}Définir et accéder{% else %}Se connecter{% endif %}</button>
+  </form>
+</div>
+</body>
+</html>

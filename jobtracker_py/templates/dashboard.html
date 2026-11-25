@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Dashboard – JobTracker{% endblock %}
+{% block content %}
+<div class="page-header">
+  <span class="page-title">Tableau de bord</span>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-secondary btn-sm" onclick="runJob('offres')">🔍 Chercher offres</button>
+    <button class="btn btn-secondary btn-sm" onclick="runJob('inbox')">📬 Analyser boîte mail</button>
+    <button class="btn btn-secondary btn-sm" onclick="runJob('relances')">📨 Envoyer relances</button>
+    <button class="btn btn-ghost btn-sm" onclick="runJob('digest')">📊 Digest</button>
+  </div>
+</div>
+
+{% if missing %}
+<div class="alert alert-warn">
+  ⚠️ Configuration incomplète : {{ missing | join(', ') }}.
+  <a href="/settings" style="color:inherit;font-weight:600">→ Paramètres</a>
+</div>
+{% endif %}
+
+<div id="job-output" style="display:none" class="alert alert-success"></div>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-num">{{ stats.offres_nouvelles }}</div>
+    <div class="stat-label">Nouvelles offres</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">{{ stats.candidatures_total }}</div>
+    <div class="stat-label">Candidatures total</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">{{ stats.en_attente }}</div>
+    <div class="stat-label">En attente</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num" style="color:#fff176">{{ stats.entretiens }}</div>
+    <div class="stat-label">Entretiens</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num" style="color:#ce93d8">{{ stats.reponses }}</div>
+    <div class="stat-label">Réponses reçues</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num" style="color:#ef9a9a">{{ stats.refus }}</div>
+    <div class="stat-label">Refus</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Dernières candidatures</div>
+  {% if recent %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Poste</th><th>Entreprise</th><th>Statut</th><th>Date</th><th>Canal</th><th></th></tr></thead>
+      <tbody>
+      {% for c in recent %}
+      <tr>
+        <td><a href="/candidatures/{{ c.id }}">{{ c.titre or '—' }}</a></td>
+        <td>{{ c.entreprise or '—' }}</td>
+        <td>{% include "partials/_badge.html" ignore missing %}<span class="badge badge-{{ c.statut | replace('_','-') }}">{{ c.statut }}</span></td>
+        <td style="color:var(--muted);font-size:.85em">{{ (c.date_candidature or '')[:10] }}</td>
+        <td style="color:var(--muted);font-size:.85em">{{ c.canal or '—' }}</td>
+        <td><a href="/candidatures/{{ c.id }}" class="btn btn-ghost btn-sm">Voir</a></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p style="color:var(--muted);font-size:.9em">Aucune candidature pour l'instant. <a href="/offres">Chercher des offres →</a></p>
+  {% endif %}
+</div>
+
+<script>
+async function runJob(job){
+  const el = document.getElementById('job-output');
+  el.style.display='block';
+  el.className='alert alert-warn';
+  el.textContent='⏳ En cours…';
+  try{
+    const r = await fetch('/jobs/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job})});
+    const d = await r.json();
+    if(d.ok){el.className='alert alert-success';el.textContent='✅ '+d.output;}
+    else{el.className='alert alert-error';el.textContent='❌ '+(d.error||d.output);}
+  }catch(e){el.className='alert alert-error';el.textContent='❌ Erreur réseau';}
+  setTimeout(()=>location.reload(),2000);
+}
+</script>
+{% endblock %}

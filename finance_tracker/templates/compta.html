@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block title %}Comptabilité – FinanceTracker{% endblock %}
+{% block content %}
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+  <h1 style="font-size:1.3rem;color:#1a1a2e">📊 Comptabilité</h1>
+  <form method="GET" style="display:flex;gap:8px;align-items:center">
+    <select name="mois" style="width:auto">
+      {% for m in mois_list %}
+        <option value="{{ m }}" {% if m==mois %}selected{% endif %}>
+          {{ ['','Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'][m] }}
+        </option>
+      {% endfor %}
+    </select>
+    <select name="annee" style="width:auto">
+      {% for a in annee_list %}
+        <option value="{{ a }}" {% if a==annee %}selected{% endif %}>{{ a }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-primary btn-sm">Afficher</button>
+    <a href="/compta/export?mois={{ mois }}&annee={{ annee }}" class="btn btn-outline btn-sm">📥 CSV</a>
+  </form>
+</div>
+
+<div class="stat-grid">
+  <div class="stat"><div class="label">Revenus</div><div class="value green">{{ "%.2f"|format(solde.revenus) }} €</div></div>
+  <div class="stat"><div class="label">Dépenses</div><div class="value red">{{ "%.2f"|format(solde.depenses) }} €</div></div>
+  <div class="stat"><div class="label">Solde</div><div class="value {{ 'green' if solde.solde >= 0 else 'red' }}">{{ "%.2f"|format(solde.solde) }} €</div></div>
+  <div class="stat"><div class="label">Revenu mensuel</div><div class="value">{{ "%.0f"|format(revenu) }} €</div></div>
+</div>
+
+<div class="card">
+  <h2>➕ Ajouter une transaction</h2>
+  <form method="POST" action="/compta/ajouter">
+    <input type="hidden" name="mois" value="{{ mois }}">
+    <input type="hidden" name="annee" value="{{ annee }}">
+    <div class="form-row">
+      <div class="field"><label>Date</label><input type="date" name="date" value="{{ today.isoformat() if today is defined else '' }}" required></div>
+      <div class="field"><label>Libellé</label><input type="text" name="libelle" placeholder="ex: Courses Lidl" required></div>
+      <div class="field"><label>Montant (€)</label><input type="number" name="montant" step="0.01" min="0" required></div>
+    </div>
+    <div class="form-row">
+      <div class="field">
+        <label>Type</label>
+        <select name="type">
+          <option value="depense">Dépense</option>
+          <option value="revenu">Revenu</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Catégorie</label>
+        <select name="categorie">
+          {% for c in categories %}<option value="{{ c }}">{{ c.replace('_',' ').capitalize() }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field"><label>Note (optionnel)</label><input type="text" name="note" placeholder=""></div>
+    </div>
+    <button type="submit" class="btn btn-success">Ajouter</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>📋 Transactions du mois</h2>
+  {% if transactions %}
+  <table>
+    <tr><th>Date</th><th>Libellé</th><th>Catégorie</th><th>Type</th><th>Montant</th><th></th></tr>
+    {% for t in transactions %}
+    <tr>
+      <td style="font-size:.85rem;white-space:nowrap">{{ t.date }}</td>
+      <td>{{ t.libelle }}</td>
+      <td><span class="badge badge-gray">{{ t.categorie }}</span></td>
+      <td>
+        {% if t.type=='revenu' %}<span class="badge badge-green">Revenu</span>
+        {% else %}<span class="badge badge-red">Dépense</span>{% endif %}
+      </td>
+      <td style="font-weight:600;color:{{ '#16a34a' if t.type=='revenu' else '#dc2626' }}">
+        {{ '+' if t.type=='revenu' else '-' }}{{ "%.2f"|format(t.montant) }} €
+      </td>
+      <td>
+        <a href="/compta/supprimer/{{ t.id }}" class="btn btn-danger btn-sm"
+           onclick="return confirm('Supprimer ?')">✕</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p style="color:#888;text-align:center;padding:20px">Aucune transaction ce mois-ci.</p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>⚙️ Revenu mensuel de référence</h2>
+  <form method="POST" action="/compta/revenu" style="display:flex;gap:12px;align-items:flex-end">
+    <div class="field" style="flex:0 0 200px"><label>Revenu net mensuel (€)</label>
+      <input type="number" name="revenu" value="{{ "%.0f"|format(revenu) }}" step="1" min="0" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Mettre à jour</button>
+  </form>
+</div>
+{% endblock %}

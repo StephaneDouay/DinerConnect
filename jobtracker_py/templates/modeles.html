@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Modèles – JobTracker{% endblock %}
+{% block content %}
+<div class="page-header">
+  <span class="page-title">Modèles de lettres</span>
+</div>
+
+<div class="card" style="margin-bottom:24px">
+  <div class="card-title">CV joint</div>
+  {% if cv_exists %}
+    <p style="color:var(--success);font-size:.9em;margin-bottom:12px">✅ CV présent — il sera joint automatiquement aux candidatures.</p>
+  {% else %}
+    <p style="color:var(--warn);font-size:.9em;margin-bottom:12px">⚠️ Aucun CV téléversé. Sans CV, les emails partent sans pièce jointe.</p>
+  {% endif %}
+  <form method="post" action="/cv/upload" enctype="multipart/form-data" style="display:flex;gap:10px;align-items:center">
+    <input type="file" name="cv" accept=".pdf" style="color:var(--text);flex:1">
+    <button type="submit" class="btn btn-primary btn-sm">Téléverser PDF</button>
+  </form>
+</div>
+
+{% for t in templates %}
+<div class="card">
+  <form method="post" action="/modeles/{{ t.id }}/edit">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+      <div style="flex:1">
+        <div class="form-group" style="margin:0">
+          <label>Nom du modèle</label>
+          <input type="text" name="nom" value="{{ t.nom }}" style="max-width:300px">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">Sauvegarder</button>
+    </div>
+    <div class="form-group">
+      <label>Sujet <span style="color:var(--muted);font-size:.8em">— variables : {titre} {entreprise}</span></label>
+      <input type="text" name="sujet" value="{{ t.sujet }}">
+    </div>
+    <div class="form-group">
+      <label>Corps <span style="color:var(--muted);font-size:.8em">— variables : {titre} {entreprise} {nom} {date} {telephone} {linkedin}</span></label>
+      <textarea name="corps" rows="8">{{ t.corps }}</textarea>
+    </div>
+  </form>
+</div>
+{% endfor %}
+{% endblock %}
