@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Candidatures – JobTracker{% endblock %}
+{% block content %}
+<div class="page-header">
+  <span class="page-title">Candidatures</span>
+  <button class="btn btn-primary btn-sm" onclick="document.getElementById('add-modal').style.display='flex'">+ Ajouter</button>
+</div>
+
+<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+  <a href="/candidatures" class="btn btn-sm {% if not statut %}btn-primary{% else %}btn-ghost{% endif %}">Toutes</a>
+  {% for s in ['brouillon','envoyee','reponse_recue','entretien','relance_j7','relance_j14','refus','sans_reponse'] %}
+  <a href="/candidatures?statut={{ s }}" class="btn btn-sm {% if statut==s %}btn-primary{% else %}btn-ghost{% endif %}">{{ s }}</a>
+  {% endfor %}
+</div>
+
+{% if candidatures %}
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Poste</th><th>Entreprise</th><th>Canal</th><th>Statut</th><th>Date</th><th></th></tr></thead>
+    <tbody>
+    {% for c in candidatures %}
+    <tr>
+      <td><a href="/candidatures/{{ c.id }}">{{ c.titre or '—' }}</a></td>
+      <td>{{ c.entreprise or '—' }}</td>
+      <td style="font-size:.85em;color:var(--muted)">{{ c.canal or '—' }}</td>
+      <td><span class="badge badge-{{ c.statut | replace('_','-') }}">{{ c.statut }}</span></td>
+      <td style="font-size:.85em;color:var(--muted)">{{ (c.date_candidature or '')[:10] }}</td>
+      <td><a href="/candidatures/{{ c.id }}" class="btn btn-ghost btn-sm">Détail</a></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card" style="text-align:center;padding:40px;color:var(--muted)">
+  <p>Aucune candidature.</p>
+</div>
+{% endif %}
+
+<!-- Add modal -->
+<div id="add-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);align-items:center;justify-content:center;z-index:100">
+  <div class="card" style="width:100%;max-width:480px;margin:0">
+    <div class="card-title">Ajouter une candidature manuelle</div>
+    <form method="post" action="/candidatures/add">
+      <div class="form-group"><label>Poste *</label><input type="text" name="titre" required></div>
+      <div class="form-group"><label>Entreprise</label><input type="text" name="entreprise"></div>
+      <div class="form-group"><label>Canal</label>
+        <select name="canal">
+          <option value="linkedin">LinkedIn</option>
+          <option value="email">Email direct</option>
+          <option value="site_entreprise">Site entreprise</option>
+          <option value="france_travail">France Travail</option>
+          <option value="autre">Autre</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Email recruteur</label><input type="email" name="recruteur_email"></div>
+      <div class="form-group"><label>Notes</label><textarea name="notes" style="min-height:80px"></textarea></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('add-modal').style.display='none'">Annuler</button>
+        <button type="submit" class="btn btn-primary">Ajouter</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

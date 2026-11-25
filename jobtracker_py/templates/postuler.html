@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Postuler – JobTracker{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <a href="/offres" style="color:var(--muted);font-size:.85em">← Offres</a>
+    <div class="page-title" style="margin-top:4px">Postuler : {{ offre.titre }}</div>
+    <div style="color:var(--muted);font-size:.88em">{{ offre.entreprise or '' }} {% if offre.lieu %}· {{ offre.lieu }}{% endif %}</div>
+  </div>
+</div>
+
+<div style="display:flex;gap:16px;flex-wrap:wrap">
+  <div style="flex:1;min-width:280px">
+    <div class="card">
+      <div class="card-title">Détail de l'offre</div>
+      <div style="font-size:.88em;color:var(--muted);line-height:1.6;white-space:pre-wrap">{{ (offre.description or 'Pas de description.')[:800] }}</div>
+      {% if offre.url %}
+      <a href="{{ offre.url }}" target="_blank" class="btn btn-ghost btn-sm" style="margin-top:12px;display:inline-block">Voir l'annonce ↗</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div style="flex:2;min-width:320px">
+    <form method="post">
+      <div class="card">
+        <div class="card-title">Modèle de lettre</div>
+        <div class="form-group">
+          <label>Choisir un modèle</label>
+          <select name="template_id" id="tpl-select" onchange="previewTpl()">
+            {% for t in templates %}
+            <option value="{{ t.id }}" data-sujet="{{ t.sujet }}" data-corps="{{ t.corps }}">{{ t.nom }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Sujet (aperçu)</label>
+          <input type="text" id="preview-sujet" readonly style="color:var(--muted)">
+        </div>
+        <div class="form-group">
+          <label>Corps (aperçu — modifiable dans Modèles)</label>
+          <textarea id="preview-corps" readonly rows="8" style="color:var(--muted)"></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Envoi</div>
+        <div class="form-group">
+          <label>Email du recruteur</label>
+          <input type="email" name="recruteur_email" placeholder="recruteur@entreprise.fr">
+        </div>
+        <div style="display:flex;gap:8px">
+          <button type="submit" name="action" value="brouillon" class="btn btn-secondary">💾 Sauver brouillon</button>
+          <button type="submit" name="action" value="envoyer" class="btn btn-primary">📤 Envoyer maintenant</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function previewTpl(){
+  const sel=document.getElementById('tpl-select');
+  const opt=sel.options[sel.selectedIndex];
+  const titre="{{ offre.titre|e }}",entreprise="{{ offre.entreprise|e }}",nom="{{ candidat.get('nom','')|e }}";
+  function fill(s){return s.replace(/{titre}/g,titre).replace(/{entreprise}/g,entreprise).replace(/{nom}/g,nom);}
+  document.getElementById('preview-sujet').value=fill(opt.dataset.sujet||'');
+  document.getElementById('preview-corps').value=fill(opt.dataset.corps||'');
+}
+previewTpl();
+</script>
+{% endblock %}

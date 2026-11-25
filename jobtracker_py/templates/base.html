@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}JobTracker{% endblock %}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0f0f13;--surface:#1a1a24;--border:#2a2a3a;--accent:#c9a96e;--accent2:#8b6f3a;--text:#e8e8f0;--muted:#888;--success:#4caf50;--error:#ef5350;--warn:#ff9800}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* NAV */
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;gap:24px;height:56px}
+.nav-brand{font-weight:700;font-size:1.1em;color:var(--accent);flex-shrink:0}
+.nav-links{display:flex;gap:4px;flex:1}
+.nav-links a{padding:6px 12px;border-radius:6px;color:var(--muted);font-size:.9em;transition:all .15s}
+.nav-links a:hover,.nav-links a.active{background:var(--border);color:var(--text);text-decoration:none}
+.nav-right{margin-left:auto;font-size:.85em;color:var(--muted)}
+
+/* MAIN */
+main{flex:1;padding:24px;max-width:1200px;width:100%;margin:0 auto}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px}
+.card-title{font-size:1em;font-weight:600;color:var(--accent);margin-bottom:12px}
+
+/* STAT GRID */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}
+.stat-num{font-size:2em;font-weight:700;color:var(--accent)}
+.stat-label{font-size:.8em;color:var(--muted);margin-top:4px}
+
+/* ALERTS */
+.alert{padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:.9em}
+.alert-warn{background:#332200;border:1px solid var(--warn);color:var(--warn)}
+.alert-success{background:#1a2e1a;border:1px solid var(--success);color:var(--success)}
+.alert-error{background:#2e1a1a;border:1px solid var(--error);color:var(--error)}
+
+/* FLASH */
+.flash-list{list-style:none}
+.flash-success{padding:10px 14px;background:#1a2e1a;border:1px solid var(--success);color:var(--success);border-radius:8px;margin-bottom:10px;font-size:.9em}
+.flash-error{padding:10px 14px;background:#2e1a1a;border:1px solid var(--error);color:var(--error);border-radius:8px;margin-bottom:10px;font-size:.9em}
+
+/* TABLE */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.9em}
+th{text-align:left;padding:10px 12px;border-bottom:2px solid var(--border);color:var(--muted);font-weight:600;white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:hover td{background:rgba(255,255,255,.03)}
+
+/* BUTTONS */
+.btn{display:inline-block;padding:8px 16px;border-radius:6px;border:none;cursor:pointer;font-size:.9em;font-weight:500;transition:all .15s;text-align:center}
+.btn-primary{background:var(--accent);color:#111}
+.btn-primary:hover{background:#d4b47a;color:#111;text-decoration:none}
+.btn-secondary{background:var(--border);color:var(--text)}
+.btn-secondary:hover{background:#3a3a4a;text-decoration:none}
+.btn-danger{background:#ef5350;color:#fff}
+.btn-danger:hover{background:#e53935;text-decoration:none}
+.btn-sm{padding:4px 10px;font-size:.82em}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);text-decoration:none}
+
+/* BADGE */
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.78em;font-weight:600}
+.badge-new{background:#1a3a1a;color:#66bb6a}
+.badge-sent{background:#1a2a3a;color:#64b5f6}
+.badge-reply{background:#2a1a3a;color:#ce93d8}
+.badge-entretien{background:#2a2a1a;color:#fff176}
+.badge-refus{background:#2e1a1a;color:#ef9a9a}
+.badge-relance{background:#2a1a1a;color:#ffb74d}
+.badge-draft{background:#2a2a2a;color:#aaa}
+
+/* FORMS */
+.form-group{margin-bottom:14px}
+label{display:block;font-size:.85em;color:var(--muted);margin-bottom:5px}
+input[type=text],input[type=email],input[type=password],select,textarea{width:100%;background:#111118;border:1px solid var(--border);border-radius:6px;padding:9px 12px;color:var(--text);font-size:.9em;font-family:inherit;transition:border .15s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
+textarea{resize:vertical;min-height:120px}
+
+/* PAGE HEADER */
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.page-title{font-size:1.3em;font-weight:700}
+</style>
+{% block head %}{% endblock %}
+</head>
+<body>
+<nav>
+  <span class="nav-brand">📋 JobTracker</span>
+  <div class="nav-links">
+    <a href="/dashboard" {% if request.path=='/dashboard' %}class="active"{% endif %}>Tableau de bord</a>
+    <a href="/offres" {% if request.path.startswith('/offres') %}class="active"{% endif %}>Offres</a>
+    <a href="/candidatures" {% if request.path.startswith('/candidatures') %}class="active"{% endif %}>Candidatures</a>
+    <a href="/modeles" {% if request.path.startswith('/modeles') %}class="active"{% endif %}>Modèles</a>
+    <a href="/journal" {% if request.path=='/journal' %}class="active"{% endif %}>Journal</a>
+    <a href="/settings" {% if request.path=='/settings' %}class="active"{% endif %}>Paramètres</a>
+  </div>
+  <div class="nav-right"><a href="/logout" style="color:var(--muted)">Déconnexion</a></div>
+</nav>
+<main>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ul class="flash-list">
+      {% for cat, msg in messages %}
+        <li class="flash-{{ cat }}">{{ msg }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+{% block content %}{% endblock %}
+</main>
+</body>
+</html>

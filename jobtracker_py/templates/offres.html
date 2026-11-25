@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Offres – JobTracker{% endblock %}
+{% block content %}
+<div class="page-header">
+  <span class="page-title">Offres d'emploi</span>
+  <button class="btn btn-primary btn-sm" onclick="refresh()">🔄 Actualiser</button>
+</div>
+
+<div id="refresh-msg" style="display:none" class="alert alert-warn">⏳ Recherche en cours…</div>
+
+<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+  {% for s in ['nouveau','postule','ignore'] %}
+  <a href="/offres?statut={{ s }}" class="btn btn-sm {% if statut==s %}btn-primary{% else %}btn-ghost{% endif %}">{{ s }}</a>
+  {% endfor %}
+</div>
+
+{% if offres %}
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Poste</th><th>Entreprise</th><th>Lieu</th><th>Source</th><th>Date</th><th>Actions</th></tr></thead>
+    <tbody>
+    {% for o in offres %}
+    <tr>
+      <td>
+        {% if o.url %}<a href="{{ o.url }}" target="_blank" rel="noopener">{{ o.titre }}</a>{% else %}{{ o.titre }}{% endif %}
+      </td>
+      <td>{{ o.entreprise or '—' }}</td>
+      <td style="color:var(--muted);font-size:.85em">{{ o.lieu or '—' }}</td>
+      <td><span class="badge badge-new" style="font-size:.75em">{{ o.source }}</span></td>
+      <td style="color:var(--muted);font-size:.85em">{{ (o.created_at or '')[:10] }}</td>
+      <td style="display:flex;gap:6px;align-items:center">
+        <a href="/offres/{{ o.id }}/postuler" class="btn btn-primary btn-sm">Postuler</a>
+        <form method="post" action="/offres/{{ o.id }}/ignorer" style="margin:0">
+          <button class="btn btn-ghost btn-sm" type="submit">Ignorer</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card" style="text-align:center;padding:40px;color:var(--muted)">
+  <p style="font-size:1.1em">Aucune offre « {{ statut }} ».</p>
+  <p style="margin-top:8px;font-size:.9em">Cliquez sur <strong>Actualiser</strong> pour chercher de nouvelles offres.</p>
+</div>
+{% endif %}
+
+<script>
+async function refresh(){
+  const el=document.getElementById('refresh-msg');
+  el.style.display='block';
+  const r=await fetch('/offres/refresh',{method:'POST'});
+  const d=await r.json();
+  if(d.ok){el.className='alert alert-success';el.textContent='✅ Nouvelles offres récupérées';}
+  else{el.className='alert alert-error';el.textContent='❌ '+(d.error||'Erreur');}
+  setTimeout(()=>location.reload(),1500);
+}
+</script>
+{% endblock %}

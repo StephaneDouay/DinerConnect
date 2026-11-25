@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}{{ cand.titre }} – JobTracker{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <a href="/candidatures" style="color:var(--muted);font-size:.85em">← Candidatures</a>
+    <div class="page-title" style="margin-top:4px">{{ cand.titre or 'Candidature #'+cand.id|string }}</div>
+    <div style="color:var(--muted);font-size:.88em">{{ cand.entreprise or '' }}</div>
+  </div>
+  <span class="badge badge-{{ cand.statut | replace('_','-') }}" style="font-size:.95em">{{ cand.statut }}</span>
+</div>
+
+<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
+  <div style="flex:1;min-width:300px">
+    <div class="card">
+      <div class="card-title">Infos</div>
+      <table style="width:100%;font-size:.9em">
+        <tr><td style="color:var(--muted);padding:4px 0;width:120px">Canal</td><td>{{ cand.canal or '—' }}</td></tr>
+        <tr><td style="color:var(--muted);padding:4px 0">Recruteur</td><td>{{ cand.recruteur_email or '—' }}</td></tr>
+        <tr><td style="color:var(--muted);padding:4px 0">Date</td><td>{{ (cand.date_candidature or '')[:10] }}</td></tr>
+        {% if cand.notes %}
+        <tr><td style="color:var(--muted);padding:4px 0">Notes</td><td>{{ cand.notes }}</td></tr>
+        {% endif %}
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Changer le statut</div>
+      <form method="post" action="/candidatures/{{ cand.id }}/statut" style="display:flex;gap:8px;flex-wrap:wrap">
+        <select name="statut" style="flex:1">
+          {% for s in ['brouillon','envoyee','reponse_recue','entretien','refus','sans_reponse','relance_j7','relance_j14'] %}
+          <option value="{{ s }}" {% if cand.statut==s %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary btn-sm">Appliquer</button>
+      </form>
+    </div>
+
+    {% if not cand.recruteur_email or cand.statut == 'brouillon' %}
+    <div class="card">
+      <div class="card-title">Envoyer la candidature</div>
+      <form method="post" action="/candidatures/{{ cand.id }}/send">
+        <div class="form-group"><label>Email recruteur *</label><input type="email" name="recruteur_email" value="{{ cand.recruteur_email or '' }}" required></div>
+        <button type="submit" class="btn btn-primary btn-sm">Envoyer</button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+
+  <div style="flex:2;min-width:320px">
+    <div class="card">
+      <div class="card-title">Échanges ({{ messages|length }})</div>
+      {% if messages %}
+        {% for m in messages %}
+        <div style="border-left:3px solid {% if m.direction=='entrant' %}var(--accent){% else %}var(--border){% endif %};padding:10px 14px;margin-bottom:12px;background:#111118;border-radius:0 6px 6px 0">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <span style="font-size:.8em;color:{% if m.direction=='entrant' %}var(--accent){% else %}var(--muted){% endif %}">
+              {% if m.direction=='entrant' %}📨 Reçu{% elif m.direction=='sortant' %}📤 Envoyé{% else %}📝 Brouillon{% endif %}
+            </span>
+            <span style="font-size:.78em;color:var(--muted)">{{ (m.date_envoi or '')[:16] }}</span>
+          </div>
+          <div style="font-weight:600;margin-bottom:4px;font-size:.9em">{{ m.sujet or '' }}</div>
+          <div style="font-size:.85em;color:var(--muted);white-space:pre-wrap">{{ (m.corps or '')[:400] }}{% if m.corps and m.corps|length > 400 %}…{% endif %}</div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p style="color:var(--muted);font-size:.9em">Aucun message.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
