@@ -27,7 +27,7 @@ def verify_password(pwd):
     stored = get_setting('password_hash')
     if stored is None:
         # Premier accès : initialiser avec mot de passe par défaut
-        h = generate_password_hash('jobtracker')
+        h = generate_password_hash('jobtracker', method='pbkdf2:sha256')
         set_setting('password_hash', h)
         stored = h
     return check_password_hash(stored, pwd)
@@ -256,7 +256,7 @@ def parametres():
         nouveau = request.form.get('nouveau_mdp', '')
         if ancien and nouveau:
             if verify_password(ancien):
-                set_setting('password_hash', generate_password_hash(nouveau))
+                set_setting('password_hash', generate_password_hash(nouveau, method='pbkdf2:sha256'))
                 flash('Mot de passe mis à jour', 'success')
             else:
                 flash('Ancien mot de passe incorrect', 'danger')
