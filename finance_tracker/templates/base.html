@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}FinanceTracker{% endblock %}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f2f5;color:#222;min-height:100vh}
+nav{background:#1a1a2e;color:#fff;padding:0 24px;display:flex;align-items:center;gap:0;height:56px}
+nav .logo{font-weight:700;font-size:1.1rem;color:#e8d44d;margin-right:32px;text-decoration:none}
+nav a{color:#ccc;text-decoration:none;padding:0 16px;height:56px;display:flex;align-items:center;font-size:.9rem;transition:background .15s}
+nav a:hover,nav a.active{background:#16213e;color:#fff}
+nav .spacer{flex:1}
+nav .logout{color:#f87171;font-size:.85rem}
+.container{max-width:1100px;margin:0 auto;padding:24px 16px}
+.card{background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);padding:24px;margin-bottom:20px}
+.card h2{font-size:1.1rem;margin-bottom:16px;color:#1a1a2e}
+.btn{display:inline-block;padding:8px 18px;border-radius:8px;border:none;cursor:pointer;font-size:.9rem;font-weight:500;text-decoration:none;transition:opacity .15s}
+.btn:hover{opacity:.85}
+.btn-primary{background:#1a1a2e;color:#fff}
+.btn-success{background:#22c55e;color:#fff}
+.btn-danger{background:#ef4444;color:#fff}
+.btn-sm{padding:4px 10px;font-size:.8rem}
+.btn-outline{background:transparent;border:1.5px solid #1a1a2e;color:#1a1a2e}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #f0f0f0}
+th{background:#f8f9fa;font-size:.82rem;text-transform:uppercase;color:#666;font-weight:600}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafbff}
+input,select,textarea{padding:8px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:.9rem;width:100%;outline:none;transition:border .15s}
+input:focus,select:focus{border-color:#1a1a2e}
+.form-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.form-row .field{flex:1;min-width:140px}
+.form-row label{display:block;font-size:.8rem;font-weight:600;margin-bottom:4px;color:#555}
+.flash{padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:.9rem}
+.flash-success{background:#dcfce7;color:#15803d}
+.flash-info{background:#dbeafe;color:#1d4ed8}
+.flash-danger{background:#fee2e2;color:#b91c1c}
+.badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.75rem;font-weight:600}
+.badge-green{background:#dcfce7;color:#15803d}
+.badge-red{background:#fee2e2;color:#b91c1c}
+.badge-yellow{background:#fef9c3;color:#a16207}
+.badge-gray{background:#f3f4f6;color:#374151}
+.progress-bar{height:12px;background:#e5e7eb;border-radius:8px;overflow:hidden}
+.progress-bar .fill{height:100%;background:#22c55e;border-radius:8px;transition:width .3s}
+.progress-bar .fill.orange{background:#f97316}
+.progress-bar .fill.red{background:#ef4444}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px;margin-bottom:20px}
+.stat{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.stat .label{font-size:.78rem;color:#888;font-weight:600;text-transform:uppercase;margin-bottom:4px}
+.stat .value{font-size:1.6rem;font-weight:700;color:#1a1a2e}
+.stat .value.green{color:#16a34a}
+.stat .value.red{color:#dc2626}
+.stat .value.orange{color:#ea580c}
+.alerte{background:#fef3c7;border:1px solid #fcd34d;padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:.9rem;color:#92400e}
+.alerte strong{color:#78350f}
+@media(max-width:600px){.form-row{flex-direction:column}.stat-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+{% if session.auth %}
+<nav>
+  <a href="/" class="logo">💰 FinanceTracker</a>
+  <a href="/" {% if request.path=='/' %}class="active"{% endif %}>Tableau de bord</a>
+  <a href="/compta" {% if request.path.startswith('/compta') %}class="active"{% endif %}>Comptabilité</a>
+  <a href="/factures" {% if request.path.startswith('/factures') %}class="active"{% endif %}>Factures</a>
+  <a href="/epargne" {% if request.path.startswith('/epargne') %}class="active"{% endif %}>Épargne</a>
+  <span class="spacer"></span>
+  <a href="/parametres" {% if request.path=='/parametres' %}class="active"{% endif %}>⚙️ Paramètres</a>
+  <a href="/logout" class="logout">Déconnexion</a>
+</nav>
+{% endif %}
+<div class="container">
+{% with messages = get_flashed_messages(with_categories=True) %}
+  {% for cat,msg in messages %}
+    <div class="flash flash-{{ cat }}">{{ msg }}</div>
+  {% endfor %}
+{% endwith %}
+{% block content %}{% endblock %}
+</div>
+</body>
+</html>
