@@ -9,8 +9,8 @@ APP = {
     "debug": False,
 }
 
-REVENU_MENSUEL_DEFAUT = 2200
-OBJECTIF_CUISINE_MENSUEL = 542  # 6500€ / 12 mois
+REVENU_MENSUEL_DEFAUT = 1800
+OBJECTIF_CUISINE = 10000  # 10 000 € dès que possible
 
 FACTURES_DEFAUT = [
     {"nom": "Loyer",          "montant": 750,  "jour_echeance": 1,  "categorie": "logement"},

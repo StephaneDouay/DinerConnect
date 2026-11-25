@@ -41,7 +41,7 @@
       <h3 style="font-size:.95rem;margin-bottom:12px">➕ Ajouter un versement</h3>
       <form method="POST" action="/epargne/verser/{{ obj.id }}">
         <div class="form-row">
-          <div class="field"><label>Montant (€)</label><input type="number" name="montant" step="0.01" min="0.01" placeholder="{{ objectif_mensuel }}" required></div>
+          <div class="field"><label>Montant (€)</label><input type="number" name="montant" step="0.01" min="0.01" placeholder="{{ objectif_total }}" required></div>
           <div class="field"><label>Date</label><input type="date" name="date"></div>
         </div>
         <div class="form-row">

@@ -33,7 +33,7 @@ def init_db():
         date_cible = (date.today() + relativedelta(months=12)).isoformat()
         conn.execute(
             "INSERT INTO epargne_objectifs(nom,montant_cible,date_cible,description) VALUES(?,?,?,?)",
-            ("Remplacement cuisine", 6500, date_cible, "Projet rénovation cuisine complète")
+            ("Remplacement cuisine", config.OBJECTIF_CUISINE, date_cible, "Projet rénovation cuisine complète")
         )
 
     # Seed revenu mensuel par défaut

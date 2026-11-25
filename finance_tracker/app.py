@@ -64,7 +64,9 @@ def dashboard():
     cuisine = next((o for o in objectifs if 'cuisine' in o['nom'].lower()), None)
 
     capacite_epargne = revenu - solde['depenses'] - total_factures
-    alerte_epargne = cuisine and capacite_epargne < config.OBJECTIF_CUISINE_MENSUEL
+    # Calcul dynamique: mois nécessaires selon capacité d'épargne actuelle
+    mois_cuisine = round(cuisine['montant_cible'] / max(capacite_epargne, 1)) if cuisine and capacite_epargne > 0 else None
+    alerte_epargne = cuisine and (capacite_epargne <= 0 or mois_cuisine is None)
 
     return render_template('dashboard.html',
         solde=solde, revenu=revenu,
@@ -74,6 +76,7 @@ def dashboard():
         cuisine=cuisine,
         capacite_epargne=capacite_epargne,
         alerte_epargne=alerte_epargne,
+        mois_cuisine=mois_cuisine,
         mois_nom=today.strftime('%B %Y'),
         today=today,
     )
@@ -206,7 +209,7 @@ def epargne():
     return render_template('epargne.html',
         objectifs=objectifs, versements_par_obj=versements_par_obj,
         revenu=revenu, total_factures=total_factures,
-        objectif_mensuel=config.OBJECTIF_CUISINE_MENSUEL,
+        objectif_total=config.OBJECTIF_CUISINE,
     )
 
 @app.route('/epargne/verser/<int:objectif_id>', methods=['POST'])
